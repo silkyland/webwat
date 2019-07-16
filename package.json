@@ -3,13 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "nodemon --exec babel-node ./bin/www"
   },
   "dependencies": {
+    "@babel/core": "^7.5.4",
+    "@babel/node": "^7.5.0",
+    "@babel/preset-env": "^7.5.4",
     "cookie-parser": "~1.4.4",
+    "csurf": "^1.10.0",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
+    "express-session": "^1.16.2",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1"
   }
