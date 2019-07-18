@@ -5,7 +5,7 @@ import { connect } from "net";
 import connection from "../config/database";
 import bcrypt from "bcrypt";
 
-const SALT_ROUND = 10;
+export const SALT_ROUND = 10;
 
 router.get("/add-sample-data", (req, res, next) => {
   const data = [
