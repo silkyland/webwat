@@ -2,13 +2,13 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
   <!-- Page Heading -->
-  <h1 class="h3 mb-4 text-gray-800">ข่าวสาร</h1>
+  <h1 class="h3 mb-4 text-gray-800">หมวดหมู่</h1>
   <div class="card">
     <div class="card-header">
-      รายการข่าว
+      รายการหมวดหมู่
       <span class="float-right">
-        <a class="btn btn-sm btn-primary" href="/admin/news/add"
-          ><i class="fa fa-plus"></i> เพิ่มข่าวใหม่</a
+        <a class="btn btn-sm btn-primary" href="/admin/category/add"
+          ><i class="fa fa-plus"></i> เพิ่มหมวดหมู่ใหม่</a
         >
       </span>
     </div>
@@ -17,34 +17,37 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>หัวเรื่อง</th>
-            <th>หมวดหมู่</th>
-            <th>ผู้เขียน</th>
+            <th>ชื่อหมวดหมู่</th>
             <th class="text-right">จัดการ</th>
           </tr>
         </thead>
         <tbody>
+          <% categories.map((category,index) => { %>
           <tr>
-            <td>1</td>
+            <td><%= index+1 %></td>
             <td>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              <%= category.name %>
             </td>
-            <td>ประชาสัมพันธ์</td>
-            <td>บัณฑิต นันทะเทศ</td>
+
             <td class="text-right">
               <div class="btn-group" role="group">
-                <a class="btn btn-info btn-sm" target="_blank" href="/news/1">
-                  <i class="fa fa-search"></i>
-                </a>
-                <a class="btn btn-warning btn-sm" href="/news/edit/1">
+                <a
+                  class="btn btn-warning btn-sm"
+                  href="/admin/category/edit/<%= category.id %>"
+                >
                   <i class="fa fa-edit"></i>
                 </a>
-                <a class="btn btn-danger btn-sm" href="/news/delete/1">
+                <a
+                  onclick="return confirm('คุณแน่ในหรือจะลบข้อมูลนี้ ?') ? true : false"
+                  class="btn btn-danger btn-sm"
+                  href="/admin/category/delete/<%= category.id %>"
+                >
                   <i class="fa fa-trash"></i>
                 </a>
               </div>
             </td>
           </tr>
+          <% }) %>
         </tbody>
       </table>
     </div>

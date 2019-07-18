@@ -2,15 +2,10 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
   <!-- Page Heading -->
-  <h1 class="h3 mb-4 text-gray-800">ข่าวสาร</h1>
+  <h1 class="h3 mb-4 text-gray-800">เพิ่มข่าวใหม่</h1>
   <div class="card">
     <div class="card-header">
-      รายการข่าว
-      <span class="float-right">
-        <a class="btn btn-sm btn-primary" href="/admin/news/add"
-          ><i class="fa fa-plus"></i> เพิ่มข่าวใหม่</a
-        >
-      </span>
+      เพิ่มข่าวใหม่
     </div>
     <div class="card-body">
       <form
@@ -61,14 +56,15 @@
 <!-- /.container-fluid -->
 
 <%- include('../../layout/footer') %>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/summernote.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/summernote-bs4.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote-cleaner@1.0.0/summernote-cleaner.min.js"></script>
 <script>
   $(document).ready(function() {
     $("#summernote").summernote({
       height: 250,
+      placeholder: "โปรดกรอกรายละเอียดที่นี่...",
       toolbar: [
-        ["cleaner", ["cleaner"]], // The Button
+        
         ["style", ["style"]],
         ["font", ["bold", "italic", "underline", "clear"]],
         ["fontname", ["fontname"]],
@@ -76,9 +72,9 @@
         ["para", ["ul", "ol", "paragraph"]],
         ["height", ["height"]],
         ["table", ["table"]],
-        ["insert", ["media", "link", "hr"]],
+        ["insert", ["picture", "video", "media", "link", "hr"]],
         ["view", ["fullscreen", "codeview"]],
-        ["help", ["help"]]
+        ["cleaner", ["cleaner"]], // The Button
       ],
       cleaner: {
         action: "both", // both|button|paste 'button' only cleans via toolbar button, 'paste' only clean when pasting content, both does both options.
