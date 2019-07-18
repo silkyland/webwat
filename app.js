@@ -1,36 +1,42 @@
 import createError from "http-errors";
 import express from "express";
+import session from "express-session";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import session from "express-session";
 import { homeRouter, authRouter, userRouter, adminRouter } from "./routes";
 import config from "./config";
 import csrfToken from "csurf";
+import flash from "express-flash";
 
 var app = express();
+app.use(
+  session({
+    secret: config.sessionSecret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {}
+  })
+);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 //app.use(csrfToken);
-app.use(
-  session({
-    secret: config.sessionSecrete,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true }
-  })
-);
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(flash());
+
+//routes
 app.use("/", homeRouter);
 app.use("/users", userRouter);
 app.use("/auth", authRouter);
+app.use("/admin", adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
