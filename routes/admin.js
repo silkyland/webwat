@@ -164,7 +164,7 @@ router.post(
 
     const validation = new Validator(req.body, rules);
     if (validation.fails()) {
-      await fs.unlinkSync(req.file.path);
+      //await fs.unlinkSync(req.file.path);
       req.flash("errors", validation.errors.all());
       return res.redirect("/admin/user/add");
     }
@@ -189,6 +189,91 @@ router.post(
         res.redirect("/admin/user");
       }
     );
+  }
+);
+
+router.get("/user/edit/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `SELECT users.id, avatar, users.name, users.username, users.email, roles.id as role_id, roles.name as role_name FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.id = ?;
+     SELECT * FROM roles`;
+  connection.query(sql, [id], (error, result) => {
+    if (error) return res.send(error.message);
+    res.render("admin/user/edit", { user: result[0][0], roles: result[1] });
+  });
+});
+
+// config for upload
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, "public/uploads/avatar/");
+  },
+  filename: function(req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+router.post(
+  "/user/update/:id",
+  uploadAvatar.single("avatar"),
+  async (req, res, next) => {
+    const { id } = req.params;
+    const { username, role_id, name, email, password } = req.body;
+    let rules = {
+      username: "required|min:3",
+      name: "required|min:3",
+      email: "required|min:3|email"
+    };
+    if (password) {
+      rules = {
+        ...rules,
+        password: "required|min:3|confirmed",
+        password_confirmation: "required|min:3"
+      };
+    }
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      //await fs.unlinkSync(req.file.path);
+      req.flash("errors", validation.errors.all());
+      return res.redirect("/admin/user/edit/" + id);
+    }
+
+    const userSQL = "SELECT * FROM users WHERE id = ?";
+
+    let filename = "/img/150x150.png";
+
+    connection.query(userSQL, [id], async (error, result) => {
+      if (error) return res.send(error.message);
+      filename = result[0].avatar;
+      if (req.file) {
+        const imagePath = "public/uploads/avatar/";
+        const fileUpload = new Resize(imagePath);
+        filename = "/uploads/avatar/" + (await fileUpload.save(req.file.path));
+        await fs.unlinkSync(req.file.path);
+      }
+      const sql = password
+        ? `UPDATE users SET username = ?, role_id = ?, name = ?, email = ?, password = ?, avatar = ? WHERE id = ?`
+        : `UPDATE users SET username = ?, role_id = ?, name = ?, email = ?, avatar = ? WHERE id = ?`;
+
+      connection.query(
+        sql,
+        password
+          ? [
+              username,
+              role_id,
+              name,
+              email,
+              bcrypt.hashSync(password, SALT_ROUND),
+              filename,
+              id
+            ]
+          : [username, role_id, name, email, filename, id],
+        (error, result) => {
+          if (error) return res.send(error);
+          req.flash("success", "บันทึกข้อมูลสำเร็จ");
+          res.redirect("/admin/user");
+        }
+      );
+    });
   }
 );
 
