@@ -1,12 +1,12 @@
 var express = require("express");
 var router = express.Router();
+import bcrypt from "bcrypt";
+import fs from "fs";
+import multer from "multer";
 import Validator from "validatorjs";
 import connection from "../config/database";
-import multer from "multer";
-const path = require("path");
-import fs from "fs";
 import Resize from "../helpers/Resize";
-import bcrypt from "bcrypt";
+const path = require("path");
 
 const SALT_ROUND = 10;
 
@@ -53,9 +53,20 @@ router.post("/category/create", (req, res) => {
 router.get("/category/edit/:id", (req, res) => {
   const { id } = req.params;
   const sql = "SELECT * FROM categories WHERE id = ?";
-  connection.query(sql, [id], (error, response) => {
+  connection.query(sql, [id], (error, result) => {
     if (error) return res.send(error.message);
-    res.render("/admin/edit", { category: result });
+    res.render("admin/category/edit", { category: result[0] });
+  });
+});
+
+router.post("/category/update/:id", (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  const sql = `UPDATE categories SET name = ? WHERE id = ?`;
+  connection.query(sql, [name, id], (error, result) => {
+    if (error) res.send(error.message);
+    req.flash("success", "บันทึกสำเร็จ");
+    res.redirect("/admin/category");
   });
 });
 
@@ -194,8 +205,10 @@ router.post(
 
 router.get("/user/edit/:id", (req, res) => {
   const { id } = req.params;
-  const sql = `SELECT users.id, avatar, users.name, users.username, users.email, roles.id as role_id, roles.name as role_name FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.id = ?;
-     SELECT * FROM roles`;
+  const sql = `SELECT users.id, avatar, users.name, users.username, users.email, 
+                roles.id as role_id, roles.name as role_name FROM users INNER JOIN 
+                roles ON users.role_id = roles.id WHERE users.id = ?;
+              SELECT * FROM roles`;
   connection.query(sql, [id], (error, result) => {
     if (error) return res.send(error.message);
     res.render("admin/user/edit", { user: result[0][0], roles: result[1] });
@@ -276,5 +289,15 @@ router.post(
     });
   }
 );
+
+router.get("/user/delete/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `DELETE FROM users WHERE id = ?`;
+  connection.query(sql, [id], (error, result) => {
+    if (error) return res.send(error);
+    req.flash("ลบข้อมูลสำเร็จ");
+    res.redirect("/admin/user");
+  });
+});
 
 module.exports = router;
