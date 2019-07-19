@@ -12,12 +12,12 @@ const SALT_ROUND = 10;
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
-  const auth = req.session.auth;
-  if (!auth) {
-    return res.redirect("/auth/login");
-  }
   res.render("admin/index");
 });
+
+// หน้า
+
+// แบนเนอร์
 
 // หมวดหมู่ข่าว
 
@@ -83,7 +83,23 @@ router.get("/category/delete/:id", (req, res) => {
 // ข่าว
 
 router.get("/news", (req, res, next) => {
-  res.render("admin/news/index");
+  const sql = `SELECT news.id,
+               news.title,
+               news.thumbnail,
+               news.created_at,
+               news.updated_at,
+               categories.id AS category_id,
+               categories.name AS category_name,
+               users.id AS user_id,
+               users.name AS user_name 
+               FROM news 
+               INNER JOIN users ON news.user_id = users.id
+               INNER JOIN categories ON news.category_id = categories.id
+               ORDER BY users.id DESC`;
+  connection.query(sql, (error, result) => {
+    if (error) res.send(error.message);
+    res.render("admin/news/index", { news: result });
+  });
 });
 
 router.get("/news/add", (req, res, next) => {
@@ -94,22 +110,51 @@ router.get("/news/add", (req, res, next) => {
   });
 });
 
-router.post("/news/admin/create", (req, res) => {
-  const rules = {
-    name: "require|min:3"
-  };
-  const validation = new Validator(req.body, rules);
-  if (validation.fails()) {
-    req.flash("error", validation.errors);
-    return res.redirect("/admin/news");
+router.post(
+  "/news/create",
+  multer({ dest: "public/uploads/news/" }).fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "files", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    const rules = {
+      title: "required|min:3",
+      category_id: "required",
+      detail: "required|min:10"
+    };
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      req.flash("error", validation.errors);
+      return res.redirect("/admin/news");
+    }
+
+    console.log(req.files);
+    console.log(req.body);
+    let filename = "/img/150x150.png";
+    if (req.file[0]) {
+      const imagePath = "public/uploads/news/";
+      const fileUpload = new Resize(imagePath, {
+        width: 720,
+        height: 480
+      });
+      filename = "/uploads/news/" + (await fileUpload.save(req.file.path));
+      await fs.unlinkSync(req.file.path);
+    }
+
+    const sql =
+      "INSERT INTO news (user_id, category_id, thumbnail, title, detail) VALUES (?, ?, ?, ?, ?)";
+    const { category_id, title, detail } = req.body;
+    connection.query(
+      sql,
+      [res.locals.auth.user.id, category_id, filename, title, detail],
+      (error, result) => {
+        if (error) return res.send(error.message);
+        req.flash("success", { message: "บันทึกข้อมูลสำเร็จ" });
+        res.redirect("/admin/news");
+      }
+    );
   }
-  const sql = "INSERT INTO news (name) VALUES (?)";
-  connection.query(sql, [req.body.name], (error, result) => {
-    if (error) return res.send(error.message);
-    req.flash("success", { message: "บันทึกข้อมูลสำเร็จ" });
-    res.redirect("/admin/news");
-  });
-});
+);
 
 router.get("/news/edit/:id", (req, res) => {
   const sql =
@@ -150,16 +195,16 @@ router.get("/user/add", (req, res, next) => {
 });
 
 // config for upload
-var storage = multer.diskStorage({
+var avatarStorage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, "public/uploads/avatar/");
+    cb(null, "");
   },
   filename: function(req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
-const uploadAvatar = multer({ storage: storage });
+const uploadAvatar = multer({ storage: avatarStorage });
 router.post(
   "/user/create",
   uploadAvatar.single("avatar"),
@@ -184,7 +229,10 @@ router.post(
 
     if (req.file) {
       const imagePath = "public/uploads/avatar/";
-      const fileUpload = new Resize(imagePath);
+      const fileUpload = new Resize(imagePath, {
+        width: 150,
+        height: 150
+      });
       filename = "/uploads/avatar/" + (await fileUpload.save(req.file.path));
       await fs.unlinkSync(req.file.path);
     }
@@ -215,16 +263,6 @@ router.get("/user/edit/:id", (req, res) => {
   });
 });
 
-// config for upload
-var storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "public/uploads/avatar/");
-  },
-  filename: function(req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
 router.post(
   "/user/update/:id",
   uploadAvatar.single("avatar"),
@@ -245,7 +283,6 @@ router.post(
     }
     const validation = new Validator(req.body, rules);
     if (validation.fails()) {
-      //await fs.unlinkSync(req.file.path);
       req.flash("errors", validation.errors.all());
       return res.redirect("/admin/user/edit/" + id);
     }
@@ -259,7 +296,10 @@ router.post(
       filename = result[0].avatar;
       if (req.file) {
         const imagePath = "public/uploads/avatar/";
-        const fileUpload = new Resize(imagePath);
+        const fileUpload = new Resize(imagePath, {
+          width: 150,
+          height: 150
+        });
         filename = "/uploads/avatar/" + (await fileUpload.save(req.file.path));
         await fs.unlinkSync(req.file.path);
       }

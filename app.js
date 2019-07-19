@@ -4,12 +4,19 @@ import session from "express-session";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import { homeRouter, authRouter, userRouter, adminRouter } from "./routes";
+import {
+  homeRouter,
+  authRouter,
+  userRouter,
+  adminRouter,
+  apiRouter
+} from "./routes";
 import config from "./config";
 import csrfToken from "csurf";
 import flash from "express-flash";
 
 var app = express();
+
 app.use(
   session({
     secret: config.sessionSecret,
@@ -32,11 +39,24 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(flash());
 
+app.use(function(req, res, next) {
+  res.locals.auth = req.session.auth;
+  next();
+});
+
+const adminOnlyMiddleware = (req, res, next) => {
+  if (!req.session.auth) {
+    return res.redirect("/auth/logout");
+  }
+  next();
+};
+
 //routes
 app.use("/", homeRouter);
 app.use("/users", userRouter);
 app.use("/auth", authRouter);
-app.use("/admin", adminRouter);
+app.use("/admin", adminOnlyMiddleware, adminRouter);
+app.use("/api", apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

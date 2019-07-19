@@ -56,15 +56,24 @@
 <!-- /.container-fluid -->
 
 <%- include('../../layout/footer') %>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/summernote-bs4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/summernote-bs4.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote-cleaner@1.0.0/summernote-cleaner.min.js"></script>
 <script>
   $(document).ready(function() {
     $("#summernote").summernote({
       height: 250,
+      callbacks: {
+        onImageUpload: function(files) {
+          var data = new FormData();
+          data.append("file", files[0]);
+          axios.post("/api/imageUpload", data).then(function(result) {
+            var imgNode = result.data;
+            $("#summernote").summernote("insertImage", imgNode);
+          });
+        }
+      },
       placeholder: "โปรดกรอกรายละเอียดที่นี่...",
       toolbar: [
-        
         ["style", ["style"]],
         ["font", ["bold", "italic", "underline", "clear"]],
         ["fontname", ["fontname"]],
@@ -74,7 +83,7 @@
         ["table", ["table"]],
         ["insert", ["picture", "video", "media", "link", "hr"]],
         ["view", ["fullscreen", "codeview"]],
-        ["cleaner", ["cleaner"]], // The Button
+        ["cleaner", ["cleaner"]] // The Button
       ],
       cleaner: {
         action: "both", // both|button|paste 'button' only cleans via toolbar button, 'paste' only clean when pasting content, both does both options.

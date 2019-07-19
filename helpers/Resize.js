@@ -3,15 +3,17 @@ const uuidv4 = require("uuid/v4");
 const path = require("path");
 
 class Resize {
-  constructor(folder) {
+  constructor(folder, options) {
     this.folder = folder;
+    this.width = options.width;
+    this.height = options.height;
   }
   async save(buffer) {
     const filename = Resize.filename();
     const filepath = this.filepath(filename);
 
     await sharp(buffer)
-      .resize(150, 150, {
+      .resize(this.width, this.height, {
         fit: sharp.fit.inside,
         withoutEnlargement: true
       })

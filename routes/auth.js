@@ -42,7 +42,7 @@ router.post("/login", async (req, res, next) => {
     return res.redirect("/auth/login");
   }
   const query = "SELECT * FROM users WHERE username = ?";
-  connection.query(query, [username], (error, result) => {
+  connection.query(query, [username], async (error, result) => {
     if (error) return res.send(error.message);
     if (
       result.length < 1 ||
@@ -53,15 +53,16 @@ router.post("/login", async (req, res, next) => {
       ]);
       return res.redirect("/auth/login");
     }
-    const user = JSON.parse(JSON.stringify(result[0]));
+    const user = await JSON.parse(JSON.stringify(result[0]));
     const session = req.session;
     session.auth = {
       isLogin: true,
       user: {
         id: user.id,
+        avatar: user.avatar,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role_id,
         username: user.username
       },
       check: () => true

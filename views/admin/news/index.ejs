@@ -24,27 +24,39 @@
           </tr>
         </thead>
         <tbody>
+          <% news.map((item, index) => { %>
           <tr>
-            <td>1</td>
+            <td><%= index + 1 %></td>
             <td>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              <%= item.title %>
             </td>
-            <td>ประชาสัมพันธ์</td>
-            <td>บัณฑิต นันทะเทศ</td>
+            <td><%= item.category_name %></td>
+            <td><%= item.user_name %></td>
             <td class="text-right">
               <div class="btn-group" role="group">
-                <a class="btn btn-info btn-sm" target="_blank" href="/news/1">
+                <a
+                  class="btn btn-info btn-sm"
+                  target="_blank"
+                  href="/news/<%= item.id %>"
+                >
                   <i class="fa fa-search"></i>
                 </a>
-                <a class="btn btn-warning btn-sm" href="/news/edit/1">
+                <a
+                  class="btn btn-warning btn-sm"
+                  href="/news/edit/<%= item.id %>"
+                >
                   <i class="fa fa-edit"></i>
                 </a>
-                <a class="btn btn-danger btn-sm" href="/news/delete/1">
+                <a
+                  class="btn btn-danger btn-sm"
+                  href="/news/delete/<%= item.id %>"
+                >
                   <i class="fa fa-trash"></i>
                 </a>
               </div>
             </td>
           </tr>
+          <% }) %>
         </tbody>
       </table>
     </div>
