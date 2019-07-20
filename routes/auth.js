@@ -9,7 +9,7 @@ export const SALT_ROUND = 10;
 
 router.get("/add-sample-data", (req, res, next) => {
   const data = [
-    "Bundit Nunates",
+    "บัณฑิต นันทะเทศ",
     "admin",
     bcrypt.hashSync("1234", SALT_ROUND),
     "silkyland@gmail.com",
