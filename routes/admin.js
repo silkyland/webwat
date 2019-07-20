@@ -11,7 +11,7 @@ const path = require("path");
 const SALT_ROUND = 10;
 
 /* GET home page. */
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
   res.render("admin/index");
 });
 
@@ -110,9 +110,18 @@ router.get("/news/add", (req, res, next) => {
   });
 });
 
+const thumbnailStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/avatar/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
 router.post(
   "/news/create",
-  multer({ dest: "public/uploads/news/" }).fields([
+  multer({ storage: thumbnailStorage }).fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "files", maxCount: 1 }
   ]),
@@ -164,6 +173,13 @@ router.get("/news/edit/:id", (req, res) => {
   });
 });
 
+router.post("/new/update/:id", multer({ storage: thumbnailStorage }).fields([
+  { name: "thumbnail", maxCount: 1 },
+  { name: "files", maxCount: 1 }
+]), (req, res) => {
+  const { id } = req.params
+})
+
 router.get("/news/delete/:id", (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM news WHERE id = ?";
@@ -193,9 +209,19 @@ router.get("/user/add", (req, res, next) => {
   });
 });
 
+const avatarStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/avatar/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+
 router.post(
   "/user/create",
-  multer({ dest: "public/uploads/avatar/" }).single("avatar"),
+  multer({ storage: avatarStorage }).single("avatar"),
   async (req, res, next) => {
     const { username, role_id, name, email, password } = req.body;
     const rules = {
@@ -255,7 +281,7 @@ router.get("/user/edit/:id", (req, res) => {
 
 router.post(
   "/user/update/:id",
-  multer({ dest: "public/uploads/avatar/" }).single("avatar"),
+  multer({ storage: avatarStorage }).single("avatar"),
   async (req, res, next) => {
     const { id } = req.params;
     const { username, role_id, name, email, password } = req.body;
@@ -303,14 +329,14 @@ router.post(
         sql,
         password
           ? [
-              username,
-              role_id,
-              name,
-              email,
-              bcrypt.hashSync(password, SALT_ROUND),
-              filename,
-              id
-            ]
+            username,
+            role_id,
+            name,
+            email,
+            bcrypt.hashSync(password, SALT_ROUND),
+            filename,
+            id
+          ]
           : [username, role_id, name, email, filename, id],
         (error, result) => {
           if (error) return res.send(error);

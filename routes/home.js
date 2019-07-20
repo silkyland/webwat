@@ -7,6 +7,10 @@ router.get("/", function(req, res, next) {
   res.render("index", { title: "Express" });
 });
 
+router.get('/show', (req,res) => {
+  res.render("show");
+})
+
 router.get("/news/:id", (req, res, news) => {
   const { id } = req.params;
   const sql = `SELECT 
