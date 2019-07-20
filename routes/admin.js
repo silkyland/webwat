@@ -127,18 +127,17 @@ router.post(
       req.flash("error", validation.errors);
       return res.redirect("/admin/news");
     }
-
-    console.log(req.files);
-    console.log(req.body);
     let filename = "/img/150x150.png";
-    if (req.file[0]) {
+    if (req.files[0]) {
       const imagePath = "public/uploads/news/";
       const fileUpload = new Resize(imagePath, {
         width: 720,
         height: 480
       });
-      filename = "/uploads/news/" + (await fileUpload.save(req.file.path));
-      await fs.unlinkSync(req.file.path);
+      filename = `/uploads/news/${await fileUpload.save(
+        req.files[0].path
+      )}${path.extname(files[0].originalname)}`;
+      await fs.unlinkSync(req.files.path);
     }
 
     const sql =
@@ -194,20 +193,9 @@ router.get("/user/add", (req, res, next) => {
   });
 });
 
-// config for upload
-var avatarStorage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "");
-  },
-  filename: function(req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
-const uploadAvatar = multer({ storage: avatarStorage });
 router.post(
   "/user/create",
-  uploadAvatar.single("avatar"),
+  multer({ dest: "public/uploads/avatar/" }).single("avatar"),
   async (req, res, next) => {
     const { username, role_id, name, email, password } = req.body;
     const rules = {
@@ -233,7 +221,9 @@ router.post(
         width: 150,
         height: 150
       });
-      filename = "/uploads/avatar/" + (await fileUpload.save(req.file.path));
+      filename = `/uploads/avatar/${await fileUpload.save(
+        req.file.path
+      )}${path.extname(file.originalname)}`;
       await fs.unlinkSync(req.file.path);
     }
     const sql =
@@ -265,7 +255,7 @@ router.get("/user/edit/:id", (req, res) => {
 
 router.post(
   "/user/update/:id",
-  uploadAvatar.single("avatar"),
+  multer({ dest: "public/uploads/avatar/" }).single("avatar"),
   async (req, res, next) => {
     const { id } = req.params;
     const { username, role_id, name, email, password } = req.body;
@@ -300,7 +290,9 @@ router.post(
           width: 150,
           height: 150
         });
-        filename = "/uploads/avatar/" + (await fileUpload.save(req.file.path));
+        filename = `/uploads/avatar/${await fileUpload.save(
+          req.file.path
+        )}${path.extname(file.originalname)}`;
         await fs.unlinkSync(req.file.path);
       }
       const sql = password
