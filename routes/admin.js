@@ -17,6 +17,136 @@ router.get("/", function(req, res, next) {
 
 // หน้า
 
+router.get("/page", (req, res) => {
+  const sql = `SELECT pages.id, pages.title,
+               users.id AS user_id, users.name AS user_name,
+               pages.thumbnail, pages.detail FROM pages
+               INNER JOIN users ON pages.user_id = users.id
+               ORDER BY pages.id DESC`;
+  connection.query(sql, (error, result) => {
+    if (error) return res.send(error.message);
+    res.render("admin/page/index", { pages: result });
+  });
+});
+
+router.get("/page/add", (req, res) => {
+  res.render("admin/page/add");
+});
+
+const thumbnailPageStorage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, "public/uploads/page/");
+  },
+  filename: function(req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+router.post(
+  "/page/create",
+  multer({ storage: thumbnailPageStorage }).fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "files", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    const rules = {
+      title: "required|min:3",
+      detail: "required|min:3"
+    };
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      req.flash("error", validation.errors.all());
+      return res.redirect("/admin/page/add");
+    }
+    const { title, detail } = req.body;
+    let filename = "/img/150x150.png";
+    if (req.files.thumbnail) {
+      const imagePath = "public/uploads/page/";
+      const fileUpload = new Resize(imagePath, {
+        width: 1920,
+        height: 1080
+      });
+      filename = `/uploads/page/${await fileUpload.save(
+        req.files.thumbnail[0].path
+      )}`;
+      await fs.unlinkSync(req.files.thumbnail[0].path);
+    }
+
+    const sql = `INSERT INTO pages (title, thumbnail, user_id, detail) VALUES (?, ?, ?, ?)`;
+    connection.query(
+      sql,
+      [title, filename, res.locals.auth.user.id, detail],
+      (error, result) => {
+        if (error) return res.send(error.message);
+        req.flash("success", "บันทึกข้อมูลสำเร็จ");
+        res.redirect("/admin/page");
+      }
+    );
+  }
+);
+
+router.get("/page/edit/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `SELECT * FROM pages WHERE id = ?`;
+  connection.query(sql, [id], (error, result) => {
+    if (error) return req.send(error.message);
+    res.render("admin/page/edit", { page: result[0] });
+  });
+});
+
+router.post(
+  "/page/update/:id",
+  multer({ storage: thumbnailPageStorage }).any(),
+  async (req, res) => {
+    const rules = {
+      title: "required|min:3",
+      detail: "required|min:3"
+    };
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      req.flash("error", validation.errors.all());
+      return res.redirect("/admin/page/add");
+    }
+    const { title, detail } = req.body;
+    const { id } = req.params;
+    const sql = `SELECT * FROM pages`;
+    connection.query(sql, async (error, result) => {
+      if (error) return res.send(error.message);
+      let filename = result[0].thumbnail;
+      if (req.files[0]) {
+        const imagePath = "public/uploads/page/";
+        const fileUpload = new Resize(imagePath, {
+          width: 1920,
+          height: 1080
+        });
+        filename = `/uploads/page/${await fileUpload.save(req.files[0].path)}`;
+        await fs.unlinkSync(req.files[0].path);
+      }
+
+      const sql = `UPDATE pages SET title = ?, thumbnail = ?, user_id = ?, detail = ? WHERE id = ?`;
+      connection.query(
+        sql,
+        [title, filename, res.locals.auth.user.id, detail, id],
+        (error, result) => {
+          if (error) return res.send(error.message);
+          req.flash("success", "บันทึกข้อมูลสำเร็จ");
+          res.redirect("/admin/page");
+        }
+      );
+    });
+  }
+);
+
+router.get("/page/delete/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `DELETE FROM pages WHERE id = ?`;
+  connection.query(sql, [id], (error, result) => {
+    if (error) return res.send(error.message);
+    req.flash("success", "ลบสำเร็จ");
+    res.redirect("/admin/page");
+  });
+});
+
 // แบนเนอร์
 
 // หมวดหมู่ข่าว
@@ -287,7 +417,7 @@ router.post(
       });
       filename = `/uploads/avatar/${await fileUpload.save(
         req.file.path
-      )}${path.extname(file.originalname)}`;
+      )}`;
       await fs.unlinkSync(req.file.path);
     }
     const sql =
@@ -356,7 +486,7 @@ router.post(
         });
         filename = `/uploads/avatar/${await fileUpload.save(
           req.file.path
-        )}${path.extname(file.originalname)}`;
+        )}`;
         await fs.unlinkSync(req.file.path);
       }
       const sql = password

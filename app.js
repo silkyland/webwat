@@ -20,7 +20,7 @@ var app = express();
 app.use(
   session({
     secret: config.sessionSecret,
-    resave: false,
+    resave: true,
     saveUninitialized: true,
     cookie: {}
   })
