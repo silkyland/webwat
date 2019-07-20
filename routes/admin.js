@@ -11,7 +11,7 @@ const path = require("path");
 const SALT_ROUND = 10;
 
 /* GET home page. */
-router.get("/", function (req, res, next) {
+router.get("/", function(req, res, next) {
   res.render("admin/index");
 });
 
@@ -110,10 +110,10 @@ router.get("/news/add", (req, res, next) => {
 });
 
 const thumbnailStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads/avatar/");
+  destination: function(req, file, cb) {
+    cb(null, "public/uploads/news/");
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
@@ -142,9 +142,7 @@ router.post(
         width: 720,
         height: 480
       });
-      filename = `/uploads/news/${await fileUpload.save(
-        req.files[0].path
-      )}${path.extname(files[0].originalname)}`;
+      filename = `/uploads/news/${await fileUpload.save(req.files[0].path)}`;
       await fs.unlinkSync(req.files.path);
     }
 
@@ -164,73 +162,72 @@ router.post(
 );
 
 router.get("/news/edit/:id", (req, res) => {
-  const sql =
-  `SELECT * FROM news INNER JOIN categories ON news.category_id = categories.id WHERE news.id = ?;
+  const sql = `SELECT * FROM news WHERE id = ?;
    SELECT * FROM categories`;
   connection.query(sql, [req.params.id], (error, result) => {
     if (error) return res.send(error.message);
-    res.render("admin/news/edit", { news: result[0][0], categories: result[1] });
+    res.render("admin/news/edit", {
+      news: result[0][0],
+      categories: result[1]
+    });
   });
 });
 
-router.post("/new/update/:id", multer({ storage: thumbnailStorage }).fields([
-  { name: "thumbnail", maxCount: 1 },
-  { name: "files", maxCount: 1 }
-]), (req, res) => {
-  const { id } = req.params
-  const rules = {
-    title: "required|min:3",
-    category_id: "required",
-    detail: "required|min:10"
-  };
-  const validation = new Validator(req.body, rules);
-  if (validation.fails()) {
-    req.flash("error", validation.errors);
-    return res.redirect("/admin/news");
-  }
-
-  const sql = "SELECT * FROM news WHERE id = ?";
-  connection.query(sql, [id], async (error, result) => {
-    if (error) return res.error(error.message);
-    let filename = result[0].thumbnail;
-
-    if (req.files[0]) {
-      const imagePath = "public/uploads/news/";
-      const fileUpload = new Resize(imagePath, {
-        width: 720,
-        height: 480
-      });
-      filename = `/uploads/news/${await fileUpload.save(
-        req.files[0].path
-      )}${path.extname(files[0].originalname)}`;
-      await fs.unlinkSync(req.files.path);
+router.post(
+  "/news/update/:id",
+  multer({ storage: thumbnailStorage }).any(),
+  (req, res) => {
+    const { id } = req.params;
+    const rules = {
+      title: "required|min:3",
+      category_id: "required",
+      detail: "required|min:10"
+    };
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      req.flash("error", validation.errors);
+      return res.redirect("/admin/news");
     }
 
-    const sql =
-      "UPDATE news SET category_id = ?, thumbnail = ?, title = ?, detail = ? WHERE id = ?";
-    const { category_id, title, detail } = req.body;
-    connection.query(
-      sql,
-      [category_id, filename, title, detail, id],
-      (error, result) => {
-        if (error) return res.send(error.message);
-        req.flash("success", { message: "บันทึกข้อมูลสำเร็จ" });
-        res.redirect("/admin/news");
+    const sql = "SELECT * FROM news WHERE id = ?";
+    connection.query(sql, [id], async (error, result) => {
+      if (error) return res.error(error.message);
+      let filename = result[0].thumbnail;
+      if (req.files[0]) {
+        const imagePath = "public/uploads/news/";
+        const fileUpload = new Resize(imagePath, {
+          width: 720,
+          height: 480
+        });
+        filename = `/uploads/news/${await fileUpload.save(req.files[0].path)}`;
+        await fs.unlinkSync(req.files[0].path);
       }
-    );
-  })
 
-})
+      const sql =
+        "UPDATE news SET category_id = ?, thumbnail = ?, title = ?, detail = ? WHERE id = ?";
+      const { category_id, title, detail } = req.body;
+      connection.query(
+        sql,
+        [category_id, filename, title, detail, id],
+        (error, result) => {
+          if (error) return res.send(error.message);
+          req.flash("success", { message: "บันทึกข้อมูลสำเร็จ" });
+          res.redirect("/admin/news");
+        }
+      );
+    });
+  }
+);
 
 router.get("/news/delete/:id", (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM news WHERE id = ?";
-  connection.query(sql, (error, result) => {
+  connection.query(sql, [id], (error, result) => {
     if (error) return res.send(error.message);
     if (result) {
       req.flash("success", "ลบข้อมูลสำเร็จ");
     }
-    res.redirect("/news");
+    res.redirect("/admin/news");
   });
 });
 
@@ -252,14 +249,13 @@ router.get("/user/add", (req, res, next) => {
 });
 
 const avatarStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function(req, file, cb) {
     cb(null, "public/uploads/avatar/");
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
-
 
 router.post(
   "/user/create",
@@ -371,14 +367,14 @@ router.post(
         sql,
         password
           ? [
-            username,
-            role_id,
-            name,
-            email,
-            bcrypt.hashSync(password, SALT_ROUND),
-            filename,
-            id
-          ]
+              username,
+              role_id,
+              name,
+              email,
+              bcrypt.hashSync(password, SALT_ROUND),
+              filename,
+              id
+            ]
           : [username, role_id, name, email, filename, id],
         (error, result) => {
           if (error) return res.send(error);

@@ -43,7 +43,6 @@ router.post("/login", async (req, res, next) => {
   }
   const query = "SELECT * FROM users WHERE username = ?";
   connection.query(query, [username], async (error, result) => {
-    console.log(error);
     if (error) return res.send(error.message);
     if (
       result.length < 1 ||
