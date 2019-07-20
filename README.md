@@ -15,3 +15,8 @@
 6. Add demo user by localhost:3000/auth/add-sample-data
 7. Login to admin page => localhost:3000/auth/login
 8. Username is admin, Password is : 1234
+
+Happy hacking !!
+
+## License
+WTFPL
