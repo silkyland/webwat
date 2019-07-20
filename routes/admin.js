@@ -149,6 +149,132 @@ router.get("/page/delete/:id", (req, res) => {
 
 // แบนเนอร์
 
+router.get("/banner", (req, res) => {
+  const sql = `SELECT banners.id,
+                banners.title,
+                banners.link,
+                banners.path,
+                banners.status,
+                users.id AS user_id,
+                users.name AS user_name
+              FROM banners
+              INNER JOIN users ON banners.user_id = users.id
+              ORDER BY banners.id DESC`;
+  connection.query(sql, (error, result) => {
+    if (error) return res.send(error.message);
+    res.render("admin/banner/index", { banners: result });
+  });
+});
+
+router.get("/banner/add", (req, res) => {
+  res.render("admin/banner/add");
+});
+
+const bannerStorage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, "public/uploads/banner/");
+  },
+  filename: function(req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+router.post(
+  "/banner/create",
+  multer({ storage: bannerStorage }).single("image"),
+  async (req, res) => {
+    const rules = {
+      title: "required|min:3"
+    };
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      req.flash("error", validation.errors.all());
+      return res.redirect("/banner/add");
+    }
+    const { link, title } = req.body;
+    let filename = "/img/150x150.png";
+    if (req.file) {
+      const imagePath = "public/uploads/banner/";
+      const fileUpload = new Resize(imagePath, {
+        width: 1920,
+        height: 1080
+      });
+      filename = `/uploads/banner/${await fileUpload.save(req.file.path)}`;
+      await fs.unlinkSync(req.file.path);
+    }
+    const sql = `INSERT INTO banners (user_id, title, link, path, status) VALUES (?, ?, ?, ?, ?)`;
+    connection.query(
+      sql,
+      [res.locals.auth.user.id, title, link, filename, 1],
+      (error, result) => {
+        if (error) return res.send(error.message);
+        req.flash("success", "บันทึกสำเร็จ !");
+        res.redirect("/admin/banner");
+      }
+    );
+  }
+);
+
+router.get("/banner/edit/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `SELECT * FROM banners WHERE id = ?`;
+  connection.query(sql, [id], (error, result) => {
+    if (error) return res.send(error.message);
+    res.render("admin/banner/edit", { banner: result[0] });
+  });
+});
+
+router.post(
+  "/banner/update/:id",
+  multer({ storage: bannerStorage }).single("image"),
+  async (req, res) => {
+    const rules = {
+      title: "required|min:3"
+    };
+    const validation = new Validator(req.body, rules);
+    if (validation.fails()) {
+      req.flash("error", validation.errors.all());
+      return res.redirect("/banner/add");
+    }
+    const { link, title, status } = req.body;
+    const { id } = req.params;
+    const sql = `SELECT * FROM banners WHERE id = ?`;
+    connection.query(sql, [id], async (error, result) => {
+      if (error) return res.send(error.message);
+      let filename = result[0].path;
+      if (req.file) {
+        const imagePath = "public/uploads/banner/";
+        const fileUpload = new Resize(imagePath, {
+          width: 1920,
+          height: 1080
+        });
+        filename = `/uploads/banner/${await fileUpload.save(req.file.path)}`;
+        await fs.unlinkSync(req.file.path);
+      }
+      const sql = `UPDATE banners SET title = ?, link = ?, path = ?, status = ? WHERE id = ?`;
+      connection.query(
+        sql,
+        [title, link, filename, status, id],
+        (error, result) => {
+          if (error) return res.send(error.message);
+          req.flash("success", "บันทึกสำเร็จ !");
+          res.redirect("/admin/banner");
+        }
+      );
+    });
+  }
+);
+
+router.get("/banner/delete/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `DELETE FROM banners WHERE id = ?`;
+  connection.query(sql, [id], (error, result) => {
+    if (error) return res.send(error.message);
+    req.flash("success", "ลบสำเร็จ");
+    res.redirect("/admin/banner");
+  });
+});
+
 // หมวดหมู่ข่าว
 
 router.get("/category", (req, res) => {
@@ -415,9 +541,7 @@ router.post(
         width: 150,
         height: 150
       });
-      filename = `/uploads/avatar/${await fileUpload.save(
-        req.file.path
-      )}`;
+      filename = `/uploads/avatar/${await fileUpload.save(req.file.path)}`;
       await fs.unlinkSync(req.file.path);
     }
     const sql =
@@ -484,9 +608,7 @@ router.post(
           width: 150,
           height: 150
         });
-        filename = `/uploads/avatar/${await fileUpload.save(
-          req.file.path
-        )}`;
+        filename = `/uploads/avatar/${await fileUpload.save(req.file.path)}`;
         await fs.unlinkSync(req.file.path);
       }
       const sql = password

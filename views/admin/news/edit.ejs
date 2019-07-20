@@ -27,7 +27,7 @@
           <label for="inputThumbnail">รูปประจำข่าว</label> <br />
           <p>*หากต้องการแทนที่รูปภาพให้เลือกรูปใหม่</p>
           <img src="<%= news.thumbnail %>" alt="thumbnail" width="150" class="mb-3"> <br>
-          <input type="file" name="thumbnail" id="inputThumbnail" />
+          <input type="file" accept="image/*" name="thumbnail" id="inputThumbnail" />
         </div>
         <div class="form-group">
           <textarea class="form-control" name="detail" id="summernote" cols="30" rows="10"><%= news.detail %></textarea>
