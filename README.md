@@ -1,4 +1,4 @@
-# webwat
+# Webwat express.js
 
 ## Clone or Download as zip
 1. Clone or unzip to path/you/need e.g. cd d:/bundit
@@ -11,7 +11,7 @@
 2. Import webwat.sql to your database.
 3. In VSCode goto config/database.js and change it.
 4. In VSCode type: npm install and npm start
-5. Open Web Browser e.g. Google Chrome => localhost:3000 
+5. Open Web Browser e.g. Google Chrome => localhost:3000  (important !! for first time use)
 6. Add demo user by localhost:3000/auth/add-sample-data
 7. Login to admin page => localhost:3000/auth/login
 8. Username is admin, Password is : 1234
