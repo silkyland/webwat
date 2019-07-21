@@ -13,10 +13,11 @@ router.get("/add-sample-data", (req, res, next) => {
     "admin",
     bcrypt.hashSync("1234", SALT_ROUND),
     "silkyland@gmail.com",
-    "1"
+    "1",
+    "/img/150x150.png"
   ];
   const SQL =
-    "INSERT INTO users (name, username, password, email, role) VALUES (?, ?, ?, ?, ?)";
+    "INSERT INTO users (name, username, password, email, role_id, avatar) VALUES (?, ?, ?, ?, ?, ?)";
   connection.query(SQL, [...data], (err, user) => {
     if (err) return res.send(err.message);
     res.send("Save Success");
