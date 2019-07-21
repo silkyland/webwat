@@ -11,6 +11,7 @@ router.get("/", function (req, res, next) {
                 banners 
               INNER JOIN 
                 users ON banners.user_id = users.id
+              WHERE banners.status = 1
               ORDER BY 
                 banners.id DESC;
               SELECT news.id, news.title,
