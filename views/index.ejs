@@ -115,45 +115,20 @@
           </div>
         </div>
         <div class="row mt-3">
+          <% features.map((feature, index) => { %>
           <div class="col-md-4">
             <div class="card">
-              <img class="card-img-top" src="//via.placeholder.com/480x500" alt="Card image cap" />
+              <img class="card-img-top" src="<%= feature.thumbnail %>" alt="<%= feature.title %>" />
               <div class="card-body">
-                <h5 class="card-title">Card title</h5>
                 <p class="card-text">
-                  Some quick example text to build on the card title and make
-                  up the bulk of the card's content.
+                    <%= feature.title %>
                 </p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                <a href="/news/<%= feature.id %>" class="btn btn-primary">อ่านข่าว</a>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="card">
-              <img class="card-img-top" src="//via.placeholder.com/480x500" alt="Card image cap" />
-              <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">
-                  Some quick example text to build on the card title and make
-                  up the bulk of the card's content.
-                </p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card">
-              <img class="card-img-top" src="//via.placeholder.com/480x500" alt="Card image cap" />
-              <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">
-                  Some quick example text to build on the card title and make
-                  up the bulk of the card's content.
-                </p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-            </div>
-          </div>
+          <% }) %>
+
         </div>
       </div>
       <div class="col-3">
