@@ -26,7 +26,7 @@ router.get("/", function (req, res, next) {
               INNER JOIN users ON news.user_id = users.id
               INNER JOIN categories ON news.category_id = categories.id
               WHERE categories.id = 1
-              ORDER BY news.id DESC;
+              ORDER BY news.id DESC LIMIT 5;
               SELECT news.id, news.title,
                 news.thumbnail,
                 users.id AS user_id,
@@ -39,7 +39,7 @@ router.get("/", function (req, res, next) {
               INNER JOIN users ON news.user_id = users.id
               INNER JOIN categories ON news.category_id = categories.id
               WHERE categories.id = 2 
-              ORDER BY news.id DESC;
+              ORDER BY news.id DESC LIMIT 5;
               SELECT news.id, news.title,
                 news.thumbnail,
                 users.id AS user_id,
