@@ -55,7 +55,7 @@ router.get("/", function (req, res, next) {
   connection.query(sql, (error, result) => {
     if (error) return res.send(error.message)
 
-    res.render("index", { banners: result[0], publics: result[1], activities: result[2] });
+    res.render("index", { banners: result[0], publics: result[1], activities: result[2], features: result[3] });
   })
 });
 
