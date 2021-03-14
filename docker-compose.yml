@@ -1,6 +1,8 @@
 version: "3.3"
+
 services:
-  server:
+
+  webwat:
     image: node:14
     command: sh -c "yarn install && yarn run dev"
     working_dir: /usr/src/app
@@ -14,10 +16,19 @@ services:
       - PORT=3000
       - HOST=0.0.0.0
       - NODE_ENV=development
-    networks: 
-      - webwat_default
 
-networks: 
-  webwat_default:
-    external: 
-      name: network_default
+  db:
+    image: mariadb
+    hostname: mariadb
+    restart: always
+    container_name: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+
+  admin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
