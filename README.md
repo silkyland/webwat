@@ -7,14 +7,14 @@
 4. code . (Open VScode)
 
 ## Import webwat.sql to your database
-1. Extract files included webwat.sql file
-2. Import webwat.sql to your database.
-3. In VSCode goto config/database.js and change it.
-4. In VSCode type: npm install and npm start
-5. Open Web Browser e.g. Google Chrome => localhost:3000  (important !! for first time use)
-6. Add demo user by localhost:3000/auth/add-sample-data
-7. Login to admin page => localhost:3000/auth/login
-8. Username is admin, Password is : 1234
+0. ติดตั้ง Docker ให้เสร็จเรียบร้อย
+1. เปิด Project ด้วย VSCode
+2. เปิด Terminal ใน VScode แล้วพิมพ์ docker-compose up -d
+3. เปิด http://localhost:8080 กรอก user: root, pass: 1234
+4. สร้างฐานข้อมูลชื่อว่า webwat และ นำ webwat.sql เข้ามาใส่ฐานข้อมูล
+5. เปิด Browser เช่น Google Chrome => http://localhost:3001 ถ้าแสดงหน้าเว็บแปลว่าถูกต้อง
+6. เพิ่มผู้ใช้ตัวอย่างโดยเรียกผ่าน url http://localhost:3001/auth/add-sample-data
+7. เปิดหน้า login  => localhost:3000/auth/login username => admin, password => 1234
 
 Happy hacking !!
 
