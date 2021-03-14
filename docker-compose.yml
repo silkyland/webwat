@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  server:
+    image: node:14
+    command: sh -c "yarn install && yarn run dev"
+    working_dir: /usr/src/app
+    container_name: webwat
+    ports:
+      - "3001:3000"
+    volumes:
+      - "./:/usr/src/app"
+    restart: always
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - NODE_ENV=development
+    networks: 
+      - webwat_default
+
+networks: 
+  webwat_default:
+    external: 
+      name: network_default
