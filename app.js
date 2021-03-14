@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(flash());
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.locals.auth = req.session.auth;
   next();
 });
@@ -59,12 +59,12 @@ app.use("/admin", adminOnlyMiddleware, adminRouter);
 app.use("/api", apiRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
@@ -74,4 +74,6 @@ app.use(function(err, req, res, next) {
   res.render("error");
 });
 
-module.exports = app;
+app.listen(3000, () => {
+  console.log("Your app is listening on http://localhost:3000");
+});
