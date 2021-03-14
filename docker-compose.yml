@@ -22,6 +22,8 @@ services:
     hostname: mariadb
     restart: always
     container_name: mariadb
+    volumes: 
+      - ./dbdata:/var/lib/mysql
     ports:
       - 3306:3306
     environment:
