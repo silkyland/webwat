@@ -1,4 +1,7 @@
 node_modules
 dist
 public/uploads/banner/*
+public/uploads/avatar/*
+public/uploads/news/*
+public/uploads/page/*
 dbdata

@@ -66,16 +66,19 @@ router.get('/show', (req, res) => {
 router.get("/news/:id", (req, res, news) => {
   const { id } = req.params;
   const sql = `SELECT 
-                news.id, news.title,
-                news.thumbnail, news.detail,
-                news.created_at, news.updated_at,
-                categories.id AS category_id
-                categories.name AS category_name
-                users.id AS users_id,
-                user.name AS user_name
+                news.id,
+                news.title,
+                news.thumbnail, 
+                news.detail,
+                news.created_at,
+                news.updated_at,
+                categories.id category_id,
+                categories.name category_name,
+                users.id users_id,
+                users.name user_name
               FROM news 
               INNER JOIN categories ON news.category_id = categories.id
-              INNER JOIN users ON news.user_id = users.user_id
+              INNER JOIN users ON news.user_id = users.id
               WHERE news.id = ?`;
   connection.query(sql, [id], (error, result) => {
     if (error) return res.send(error.message);

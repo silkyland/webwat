@@ -4,6 +4,7 @@ import Resize from "../helpers/Resize";
 const path = require("path");
 import fs from "fs";
 import multer from "multer";
+import v1Router from "./v1/v1";
 
 // config for upload
 var uploadImageStorage = multer.diskStorage({
@@ -29,5 +30,7 @@ router.post("/imageUpload", uploadImage.single("file"), async (req, res) => {
   }
   res.send(filename);
 });
+
+router.use('/v1', v1Router)
 
 module.exports = router;
