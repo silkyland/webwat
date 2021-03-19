@@ -2,6 +2,10 @@ import express from "express";
 import connection from "../../config/database";
 const router = express.Router();
 
+router.get("/", (req, res) => {
+  res.render("api/v1");
+});
+
 router.get("/banners", (req, res, next) => {
   try {
     let query = `SELECT * FROM banners`;
@@ -171,6 +175,44 @@ router.get("/pages", (req, res, next) => {
     }));
     return res.json(data);
   });
+});
+
+router.get("/pages/:id", (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let query = `
+  SELECT pages.id, pages.title, pages.detail, pages.thumbnail, 
+  pages.created_at, pages.updated_at, users.id user_id,
+  users.name fullname, users.username, users.avatar, 
+  users.email FROM pages 
+  INNER JOIN users ON pages.user_id = users.id
+  WHERE pages.id = ?
+  `;
+
+    connection.query(query, [id], (err, result) => {
+      if (err) return next(err);
+      if (result.length < 1) {
+        return res.json({});
+      }
+      return res.json({
+        id: result[0].id,
+        title: result[0].title,
+        detail: result[0].detail,
+        thumbnail: result[0].thumbnail,
+        created_at: result[0].created_at,
+        updated_at: result[0].updated_at,
+        user: {
+          id: result[0].user_id,
+          name: result[0].fullname,
+          username: result[0].username,
+          avatar: result[0].avatar,
+          email: result[0].email,
+        },
+      });
+    });
+  } catch (error) {
+    return res.status(403).json(error);
+  }
 });
 
 const v1Router = router;
