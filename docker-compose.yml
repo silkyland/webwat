@@ -9,7 +9,7 @@ services:
     ports:
       - "3001:3000"
     volumes:
-      - "./dbdata:/usr/src/app"
+      - "./:/usr/src/app"
     restart: always
     environment:
       - PORT=3000
