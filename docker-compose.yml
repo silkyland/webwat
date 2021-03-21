@@ -9,26 +9,9 @@ services:
     ports:
       - "3001:3000"
     volumes:
-      - "./dbdata/:/usr/src/app"
+      - "./dbdata:/usr/src/app"
     restart: always
     environment:
       - PORT=3000
       - HOST=0.0.0.0
       - NODE_ENV=development
-    links: mariadb
-
-  db:
-    image: mariadb
-    hostname: mariadb
-    restart: always
-    container_name: mariadb
-    ports:
-      - 3306:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-
-  admin:
-    image: phpmyadmin
-    restart: always
-    ports:
-      - 8080:80
