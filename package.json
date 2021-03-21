@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --exec babel-node ./app.js",
+    "start": "babel-node ./app.js",
     "build": "nodemon --exec babel-node ./bin/www",
     "now-start": "babel-node ./bin/www"
   },
